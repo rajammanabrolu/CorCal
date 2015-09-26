@@ -9,8 +9,9 @@ public class GUI{
     private JMenuBar menuBar;
     private JMenu view, settings;
     private JMenuItem monthly, weekly;
-    private JPanel monthlyPanel, rootPanel;
+    private JPanel rootPanel;
     private WeeklyPanel weeklyPanel;
+    private MonthView monthlyPanel;
     private User user;
     
     private final String MONTHVIEW = "monthview";
@@ -22,8 +23,8 @@ public class GUI{
     
     public void setUpGUI(){
         frame = new JFrame("Calendar");
-        monthlyPanel = new JPanel();
-        weeklyPanel = new WeeklyPanel();
+        monthlyPanel = new MonthView(user);
+        weeklyPanel = new WeeklyPanel(user);
         rootPanel = new JPanel();
         menuBar= new JMenuBar();
         view = new JMenu("View");
@@ -63,7 +64,7 @@ public class GUI{
         frame.setVisible(true);
     }
     public static void main (String[] args){
-        GUI g = new GUI(new User());
+        GUI g = new GUI(new User("Name"));
         g.setUpGUI();
     }
 }

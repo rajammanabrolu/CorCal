@@ -1,14 +1,15 @@
 import java.util.Calendar;
+import java.io.Serializable;
 import java.util.TreeSet;
 
-public class User {
+public class User implements Serializable{
     
+    private static final long serialVersionUID=1L;
     private String name;
-    TreeSet<Event> events=new TreeSet<>;
+    TreeSet<Event> events=new TreeSet<>();
     
-    public User(name) {
+    public User(String name) {
         this.name = name;
-        this.calendar = calendar;
     }
 
     public String getName(){
@@ -17,5 +18,9 @@ public class User {
 
     public TreeSet<Event> getEvents(){
         return events;
+    }
+    
+    public void addEvent(Event e){
+        events.add(e);
     }
 }
