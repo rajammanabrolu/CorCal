@@ -111,6 +111,7 @@ public class MonthView extends JPanel{
 
     private class RenderCell extends AbstractCellEditor implements TableCellEditor{
         @Override public Day getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column){
+            System.out.println("Editor was called");
             return model.getValueAt(row,column);
         }
 
@@ -137,7 +138,6 @@ public class MonthView extends JPanel{
             buttons=new ArrayList<>();
             c.fill=GridBagConstraints.BOTH;
             for(Event e : events){
-                System.out.println(e.getName() + " was added to " + number);
                 StringBuffer b=new StringBuffer();
                 b.append(number == e.getStartTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getStartTime().getTime()) : "Yesterday")
                  .append(" - ")
@@ -149,7 +149,6 @@ public class MonthView extends JPanel{
                 add(adding,c);
             }
 
-            System.out.println(getComponentCount() + " components in " + number);
         }
     }
 
@@ -216,6 +215,10 @@ public class MonthView extends JPanel{
             }
 
             
+        }
+
+        @Override public boolean isCellEditable(int row, int column){
+            return true;
         }
     }
 }
