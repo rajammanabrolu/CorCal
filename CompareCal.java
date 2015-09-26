@@ -1,4 +1,4 @@
-    public void createBitField(Calendar tStamp1, Calendar tStamp2, User[] users) {
+    public void createBitField (Calendar tStamp1, Calendar tStamp2, User[] users) {
 
         int finalDiff = tStamp1.DAY_OF_YEAR - tStamp2.DAY_OF_YEAR;
         int[] bitField = new int[48 * finalDiff];
@@ -7,10 +7,10 @@
             bitField[i] = 0;
         }
 
-        for (int i = 0; i < users.length ++i) {
+        for (int i = 0; i < users.length; ++i) {
             for (int j = 0; j < user[i].events.length; ++j) {
                 if (users[i].events[j].DAY_OF_YEAR != NULL && users[i].events[j].HOUR != NULL) {
-                    bitField[user[i].events[j].DAY_OF_YEAR * 48 + user[i].events[j].HOUR * 2] = 1;
+                    bitField[(user[i].events[j].DAY_OF_YEAR - tStamp1.DAY_OF_YEAR) * 48 + (user[i].events[j].HOUR - tStamp1.DAY_OF_YEAR) * 2] = 1;
                 }
             }
         }
@@ -48,7 +48,7 @@
         if(flag == 0) {
             endTime = startTime = 0;
         }
-        
+
         Calendar finalTimeStart = tStamp1;
         finalTimeStart.DAY_OF_YEAR += startTime / 48;
         finalTimeStart.HOUR += (startTime % 48) / 2;
