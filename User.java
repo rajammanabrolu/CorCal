@@ -1,8 +1,10 @@
 import java.util.Calendar;
+import java.io.Serializable;
 import java.util.TreeSet;
 
-public class User {
+public class User implements Serializable{
 	
+	private static final long serialVersionUID=1L;
 	private String name;
     TreeSet<Event> events=new TreeSet<>;
 	
