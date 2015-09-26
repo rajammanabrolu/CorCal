@@ -4,7 +4,7 @@ public class CompareCal{
 
         int finalDiff = tStamp1.DAY_OF_YEAR - tStamp2.DAY_OF_YEAR;
         int[] field = new int[48*finalDiff];
-        
+
         for (int i = 0; i < 48*finalDiff; ++i) {
             field[i] = 0;
         }
@@ -53,12 +53,5 @@ public class CompareCal{
         }
         int[] a = {startTime , endTime};
         return a;
-}
-
-
-
-
     }
-
-
 }
