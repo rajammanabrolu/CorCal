@@ -1,5 +1,6 @@
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JFrame;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
@@ -14,7 +15,9 @@ import java.awt.GridBagConstraints;
 import java.awt.Dimension;
 import javax.swing.BoxLayout;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -84,11 +87,23 @@ public class MonthView extends JPanel{
     }
 
     public static void main(String[] args){
+        User user = new User("asdfadsfadsfasdf");
+        Calendar start = Calendar.getInstance();
+        start.add(Calendar.DAY_OF_MONTH, 1);
+        Calendar end = (Calendar)start.clone();
+        end.add(Calendar.HOUR_OF_DAY, 2);
+        user.getEvents().add(new Event("adfaergwef", start, end));
         JFrame frame=new JFrame();
         frame.add(new MonthView(null));
         frame.show();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
+    
+    public static boolean isSameDay(Calendar a, Calendar b){
+        return a.get(Calendar.DAY_OF_MONTH) == b.get(Calendar.DAY_OF_MONTH)
+               && a.get(Calendar.MONTH) == b.get(Calendar.MONTH);
+    }
+
 
     private class Day extends JPanel{
         private NavigableSet<Event> events;
@@ -104,9 +119,9 @@ public class MonthView extends JPanel{
             buttons=new TreeMap<>();
             for(Event e : events){
                 StringBuffer b=new StringBuffer();
-                //b.append(number == e.getStartDate().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getStartDate()) : "Yesterday")
-                // .append(" - ")
-                // .append(number == e.getEndDate().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getEndDate()) : "Tomorrow");
+                b.append(number == e.getStartTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getStartTime()) : "Yesterday")
+                 .append(" - ")
+                 .append(number == e.getEndTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getEndTime()) : "Tomorrow");
                 JButton adding=new JButton(b.toString());
                 adding.addActionListener(event -> System.out.println("Editing " + e));
                 buttons.put(adding,e);
@@ -115,18 +130,9 @@ public class MonthView extends JPanel{
     }
 
     private class CalendarTableModel extends AbstractTableModel{
-        private Day[][] days=new Day[4][7];
+        private Day[][] days=new Day[5][7];
 
         public CalendarTableModel(){
-            Calendar date = (Calendar)now.clone();
-            date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-
-            for(int row=0; row < 4; row++){
-                for(int column=0; column < 7; column++){
-                    days[row][column]=new Day(date.get(Calendar.DAY_OF_MONTH), new TreeSet<Event>());
-                    date.add(Calendar.DAY_OF_MONTH, 1);
-                }
-            }
         }
 
         @Override public int getColumnCount(){
@@ -147,6 +153,43 @@ public class MonthView extends JPanel{
 
         @Override public Class getColumnClass(int column){
             return Day.class;
+        }
+
+        public void update(){
+            Calendar date = (Calendar)now.clone();
+            date.set(Calendar.HOUR_OF_DAY, 0);
+            date.set(Calendar.MINUTE, 0);
+            date.set(Calendar.SECOND, 0);
+            date.set(Calendar.MILLISECOND, 0);
+            date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+
+            NavigableSet<Event> events = new TreeSet(new Event.byStartTime());
+            events.addAll(user.getEvents().tailSet(new Event("",date,date)));
+            ArrayList<Event> multipleDays = new ArrayList<>();
+            Iterator<Event> iter=events.iterator();
+            Event next=null;
+            if(iter.hasNext())
+                next=iter.next();
+            for(int row=0; row < 5; row++){
+                for(int column=0; column < 7; column++){
+                    TreeSet<Event> eventsForDay=new TreeSet<>();
+
+                    eventsForDay.addAll(multipleDays);
+                    multipleDays.removeIf(e -> isSameDay(e.getEndTime(),date));
+
+                    if(next != null && isSameDay(next.getStartTime(),date)){
+                        eventsForDay.add(next);
+                        if(next.getEndTime().after(date))
+                            multipleDays.add(next);
+                        if(iter.hasNext())
+                            next=iter.next();
+                        else
+                            next=null;
+                    }
+                    days[row][column]=new Day(date.get(Calendar.DAY_OF_MONTH), eventsForDay);
+                    date.add(Calendar.DAY_OF_MONTH, 1);
+                }
+            }
         }
     }
 }
