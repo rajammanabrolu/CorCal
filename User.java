@@ -6,11 +6,10 @@ public class User implements Serializable{
 	
 	private static final long serialVersionUID=1L;
 	private String name;
-    TreeSet<Event> events=new TreeSet<>;
+    TreeSet<Event> events=new TreeSet<>();
 	
-	public User(name) {
+	public User(String name) {
 		this.name = name;
-		this.calendar = calendar;
 	}
 
     public String getName(){
