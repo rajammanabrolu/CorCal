@@ -6,7 +6,9 @@ import javax.swing.SwingConstants;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
+import javax.swing.AbstractCellEditor;
 
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.plaf.basic.BasicArrowButton;
 
@@ -19,6 +21,8 @@ import java.util.Calendar;
 import java.util.NavigableSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -51,7 +55,6 @@ public class MonthView extends JPanel{
         add(left,constraint);
         display=new JLabel();
         display.setHorizontalAlignment(SwingConstants.CENTER);
-        updateTable();
         constraint.anchor=GridBagConstraints.CENTER;
         constraint.fill=GridBagConstraints.VERTICAL;
         constraint.weightx=0;
@@ -71,17 +74,21 @@ public class MonthView extends JPanel{
         model=new CalendarTableModel();
         JTable table=new JTable(model);
         table.setDefaultRenderer(Day.class, (t,v,i,h,r,c) -> (Day)v);
+        table.setDefaultEditor(Day.class, new RenderCell());
+        table.setRowHeight(50);
         constraint.gridx=0;
         constraint.gridy=1;
         constraint.gridwidth=3;
         constraint.weighty=1;
         constraint.fill=GridBagConstraints.BOTH;
         add(new JScrollPane(table),constraint);
+        updateTable();
     }
 
-    private void updateTable(){
+    public void updateTable(){
         display.setText(new DateFormatSymbols().getMonths()[now.get(Calendar.MONTH)] + " " + now.get(Calendar.YEAR));
         display.setPreferredSize(new Dimension(100, 50));
+        model.update();
     }
 
     public static void main(String[] args){
@@ -92,7 +99,7 @@ public class MonthView extends JPanel{
         end.add(Calendar.HOUR_OF_DAY, 2);
         user.getEvents().add(new Event("adfaergwef", start, end));
         JFrame frame=new JFrame();
-        frame.add(new MonthView(null));
+        frame.add(new MonthView(user));
         frame.show();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -102,28 +109,47 @@ public class MonthView extends JPanel{
                && a.get(Calendar.MONTH) == b.get(Calendar.MONTH);
     }
 
+    private class RenderCell extends AbstractCellEditor implements TableCellEditor{
+        @Override public Day getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column){
+            return model.getValueAt(row,column);
+        }
+
+        @Override public String getCellEditorValue(){
+            return "";
+        }
+    }
+
 
     private class Day extends JPanel{
         private NavigableSet<Event> events;
-        private TreeMap<JButton,Event> buttons;
+        private ArrayList<JButton> buttons;
         private int number;
 
         public Day(int number, NavigableSet<Event> events){
-            setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+            setLayout(new GridBagLayout());
             this.number=number;
             this.events=events;
-
-            add(new JLabel(String.valueOf(number)));
-            buttons=new TreeMap<>();
+            GridBagConstraints c=new GridBagConstraints();
+            c.anchor=GridBagConstraints.WEST;
+            c.gridx=0;
+            c.weightx=1;
+            add(new JLabel(String.valueOf(number)),c);
+            buttons=new ArrayList<>();
+            c.fill=GridBagConstraints.BOTH;
             for(Event e : events){
+                System.out.println(e.getName() + " was added to " + number);
                 StringBuffer b=new StringBuffer();
-                b.append(number == e.getStartDate().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getStartDate()) : "Yesterday")
+                b.append(number == e.getStartTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getStartTime().getTime()) : "Yesterday")
                  .append(" - ")
-                 .append(number == e.getEndDate().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getEndDate()) : "Tomorrow");
+                 .append(number == e.getEndTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getEndTime().getTime()) : "Tomorrow");
                 JButton adding=new JButton(b.toString());
+                c.weighty=e.getDuration();
                 adding.addActionListener(event -> System.out.println("Editing " + e));
-                buttons.put(adding,e);
+                buttons.add(adding);
+                add(adding,c);
             }
+
+            System.out.println(getComponentCount() + " components in " + number);
         }
     }
 
@@ -138,7 +164,7 @@ public class MonthView extends JPanel{
         }
 
         @Override public int getRowCount(){
-            return 4;
+            return 5;
         }
 
         @Override public String getColumnName(int column){
@@ -173,11 +199,11 @@ public class MonthView extends JPanel{
                     TreeSet<Event> eventsForDay=new TreeSet<>();
 
                     eventsForDay.addAll(multipleDays);
-                    multipleDays.removeIf(e -> isSameDay(e.getEndTime(),date);
+                    multipleDays.removeIf(e -> isSameDay(e.getEndTime(),date));
 
                     if(next != null && isSameDay(next.getStartTime(),date)){
                         eventsForDay.add(next);
-                        if(next.getEndTime().after(date))
+                        if(!isSameDay(next.getEndTime(),date))
                             multipleDays.add(next);
                         if(iter.hasNext())
                             next=iter.next();
@@ -188,6 +214,8 @@ public class MonthView extends JPanel{
                     date.add(Calendar.DAY_OF_MONTH, 1);
                 }
             }
+
+            
         }
     }
 }

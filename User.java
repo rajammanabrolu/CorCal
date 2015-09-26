@@ -73,6 +73,8 @@ public class User implements Serializable{
 	                    startTime = i + j - timeDiff;
 	                    flag = 1;
 	                } 
+	            } else {
+	            	counter = 0;
 	            }
 	        }
 	    }

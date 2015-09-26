@@ -44,13 +44,13 @@ public class Event implements Comparable<Event>{
 
     public static class byStartTime implements Comparator<Event>{
         @Override public int compare(Event a, Event b){
-            int comp=a.startTime.compareTo(e.startTime);
+            int comp=a.startTime.compareTo(b.startTime);
             if(comp != 0)
                 return comp;
-            comp=endTime.compareTo(e.endTime);
+            comp=a.endTime.compareTo(b.endTime);
             if(comp != 0)
                 return comp;
-            return name.compareTo(e.name);
+            return a.name.compareTo(b.name);
         }
     }
 }
