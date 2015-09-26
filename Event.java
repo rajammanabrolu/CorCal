@@ -1,6 +1,8 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 
-public class Event {
+public class Event implements Comparable<Event>{
 
     private String name;
     private Calendar startTime;
@@ -26,5 +28,10 @@ public class Event {
 
     public long getDuration() {
         return (endTime.getTimeInMillis() - startTime.getTimeInMillis()) / 1800000;
+    }
+
+    @Override
+    public int compareTo(Event e) {
+        return endTime.compareTo(e.endTime);
     }
 }
