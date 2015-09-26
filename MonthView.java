@@ -85,6 +85,12 @@ public class MonthView extends JPanel{
     }
 
     public static void main(String[] args){
+        User user = new User("asdfadsfadsfasdf");
+        Calendar start = Calendar.getInstance();
+        start.add(Calendar.DAY_OF_MONTH, 1);
+        Calendar end = (Calendar)start.clone();
+        end.add(Calendar.HOUR_OF_DAY, 2);
+        user.getEvents().add(new Event("adfaergwef", start, end));
         JFrame frame=new JFrame();
         frame.add(new MonthView(null));
         frame.show();
@@ -119,15 +125,6 @@ public class MonthView extends JPanel{
         private Day[][] days=new Day[4][7];
 
         public CalendarTableModel(){
-            Calendar date = (Calendar)now.clone();
-            date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-
-            for(int row=0; row < 4; row++){
-                for(int column=0; column < 7; column++){
-                    days[row][column]=new Day(date.get(Calendar.DAY_OF_MONTH), new TreeSet<Event>());
-                    date.add(Calendar.DAY_OF_MONTH, 1);
-                }
-            }
         }
 
         @Override public int getColumnCount(){
@@ -149,5 +146,22 @@ public class MonthView extends JPanel{
         @Override public Class getColumnClass(int column){
             return Day.class;
         }
+
+        public void update(){
+            Calendar date = (Calendar)now.clone();
+            date.set(Calendar.HOUR_OF_DAY, 0);
+            date.set(Calendar.MINUTE, 0);
+            date.set(Calendar.SECOND, 0);
+            date.set(Calendar.MILLISECOND, 0);
+            date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+            NavigableSet<Event> events = user.getEvents().subset
+            for(int row=0; row < 4; row++){
+                for(int column=0; column < 7; column++){
+                    days[row][column]=new Day(date.get(Calendar.DAY_OF_MONTH), new TreeSet<Event>());
+                    date.add(Calendar.DAY_OF_MONTH, 1);
+                }
+            }
+        }
+
     }
 }
