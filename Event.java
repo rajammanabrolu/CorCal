@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 
 public class Event implements Comparable<Event>{
 
@@ -32,6 +33,24 @@ public class Event implements Comparable<Event>{
 
     @Override
     public int compareTo(Event e) {
-        return endTime.compareTo(e.endTime);
+        int comp=endTime.compareTo(e.endTime);
+        if(comp != 0)
+            return comp;
+        comp=startTime.compareTo(e.startTime);
+        if(comp != 0)
+            return comp;
+        return name.compareTo(e.name);
+    }
+
+    public static class byStartTime implements Comparator<Event>{
+        @Override public int compare(Event a, Event b){
+            int comp=a.startTime.compareTo(e.startTime);
+            if(comp != 0)
+                return comp;
+            comp=endTime.compareTo(e.endTime);
+            if(comp != 0)
+                return comp;
+            return name.compareTo(e.name);
+        }
     }
 }

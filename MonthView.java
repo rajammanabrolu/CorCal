@@ -96,6 +96,12 @@ public class MonthView extends JPanel{
         frame.show();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
+    
+    public static boolean isSameDay(Calendar a, Calendar b){
+        return a.get(Calendar.DAY_OF_MONTH) == b.get(Calendar.DAY_OF_MONTH)
+               && a.get(Calendar.MONTH) == b.get(Calendar.MONTH);
+    }
+
 
     private class Day extends JPanel{
         private NavigableSet<Event> events;
@@ -122,7 +128,7 @@ public class MonthView extends JPanel{
     }
 
     private class CalendarTableModel extends AbstractTableModel{
-        private Day[][] days=new Day[4][7];
+        private Day[][] days=new Day[5][7];
 
         public CalendarTableModel(){
         }
@@ -154,14 +160,34 @@ public class MonthView extends JPanel{
             date.set(Calendar.SECOND, 0);
             date.set(Calendar.MILLISECOND, 0);
             date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-            NavigableSet<Event> events = user.getEvents().subset
-            for(int row=0; row < 4; row++){
+
+            NavigableSet<Event> events = new TreeSet(new Event.byStartTime());
+            events.addAll(user.getEvents().tailSet(new Event("",date,date)));
+            ArrayList<Event> multipleDays = new ArrayList<>();
+            Iterator<Event> iter=events.iterator();
+            Event next=null;
+            if(iter.hasNext())
+                next=iter.next();
+            for(int row=0; row < 5; row++){
                 for(int column=0; column < 7; column++){
-                    days[row][column]=new Day(date.get(Calendar.DAY_OF_MONTH), new TreeSet<Event>());
+                    TreeSet<Event> eventsForDay=new TreeSet<>();
+
+                    eventsForDay.addAll(multipleDays);
+                    multipleDays.removeIf(e -> isSameDay(e.getEndTime(),date);
+
+                    if(next != null && isSameDay(next.getStartTime(),date)){
+                        eventsForDay.add(next);
+                        if(next.getEndTime().after(date))
+                            multipleDays.add(next);
+                        if(iter.hasNext())
+                            next=iter.next();
+                        else
+                            next=null;
+                    }
+                    days[row][column]=new Day(date.get(Calendar.DAY_OF_MONTH), eventsForDay);
                     date.add(Calendar.DAY_OF_MONTH, 1);
                 }
             }
         }
-
     }
 }
