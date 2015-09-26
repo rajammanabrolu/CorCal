@@ -9,21 +9,28 @@ public class GUI{
     private JMenuBar menuBar;
     private JMenu view, settings;
     private JMenuItem monthly, weekly;
-    private JPanel monthlyPanel, weeklyPanel, rootPanel;
-    private JTextField test;
+    private JPanel monthlyPanel, rootPanel;
+    private WeeklyPanel weeklyPanel;
+    private User user;
     
     private final String MONTHVIEW = "monthview";
     private final String WEEKVIEW = "weekview";
+    
+    public GUI(User u){
+        user = u;
+    }
+    
     public void setUpGUI(){
         frame = new JFrame("Calendar");
         monthlyPanel = new JPanel();
-        weeklyPanel = new JPanel();
+        weeklyPanel = new WeeklyPanel();
         rootPanel = new JPanel();
         menuBar= new JMenuBar();
         view = new JMenu("View");
         settings = new JMenu("Settings");
         monthly = new JMenuItem("Monthly");
         weekly = new JMenuItem("Weekly");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(1000,1000));
         frame.setSize(1000, 1000);
         rootPanel.setPreferredSize(new Dimension(1000,1000));
@@ -56,7 +63,7 @@ public class GUI{
         frame.setVisible(true);
     }
     public static void main (String[] args){
-        GUI g = new GUI();
+        GUI g = new GUI(new User());
         g.setUpGUI();
     }
 }
