@@ -56,13 +56,6 @@ public class User implements Serializable{
 	}
 
 	public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray, int meetingLength) throws IOException, ClassNotFoundException {
-		Scanner fs = new Scanner("bitField.txt");
-		FileInputStream fis = new FileInputStream("bitField.txt");
-	    ObjectInputStream reader = new ObjectInputStream(fis);
-	    ArrayList<int[]>bitFields = new ArrayList<int[]>();
-	    while (fs.hasNext()) {
-	    	bitFields.add((int[]) reader.readObject());
-	    }
 	    int counter = 0;
 	    int flag = 0;
 	    int finalDiff = Math.abs(tStamp1.get(Calendar.DAY_OF_YEAR) - tStamp2.get(Calendar.DAY_OF_YEAR));
@@ -70,13 +63,25 @@ public class User implements Serializable{
 	    int startTime = 0;
 	    int hourDiff = Math.abs((tStamp1.get(Calendar.HOUR) - tStamp2.get(Calendar.HOUR)));
         int timeDiff = hourDiff * 2;
+        int[] bitField = new int[finalDiff * hourDiff * 2];
+	    for(int i = 0; i < fileArray.size; i++) {
+		    FileInputStream fis = new FileInputStream(fileArray[i]);
+	        ObjectInputStream reader = new ObjectInputStream(fis);
+	    	int[] input=(int[]) reader.readObject());
+            for (int j = 0; j < input.size; ++j) {
+                if(input[j] == 1) {
+                    bitField[j] = 1;
+                }
+            }
+         reader.close();
+	    }
 	    for (int i = 0; i < finalDiff; ++i) {
 	        for (int j = 0; j < hourDiff * 2; ++j) {
-	            if (bitFields.get(i + j) == bitFields.get(i + j + 1)) {
+	            if (bitField[i + j] == bitFields[i + j + 1]) {
 	                counter++;
 	                if (counter == meetingLength + 2) {
-	                    endTime = i + j + 1;
-	                    startTime = i + j - meetingLength - 1;
+	                    endTime = i + j;
+	                    startTime = i + j - meetingLength;
 	                    flag = 1;
 	                }
 	            } else {
@@ -90,9 +95,9 @@ public class User implements Serializable{
 	    if (flag == 0) {
 	        for (int i = 0; i < finalDiff; ++i) {
 	            for (int j = 0; j < hourDiff; ++j) {
-	                if (bitFields.get(i + j) == bitFields.get(i + j + 1)) {
+	                if (bitFields[i + j] == bitFields[i + j + 1]) {
 	                    counter++;
-	                    if (counter == meetingLength + 2) {
+	                    if (counter == meetingLength) {
 	                        endTime = i + j + 1;
 	                        startTime = i + j - meetingLength - 1;
 	                        flag = 1;
