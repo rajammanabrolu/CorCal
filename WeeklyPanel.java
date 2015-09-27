@@ -4,6 +4,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.NavigableSet;
@@ -12,6 +14,7 @@ import java.util.TreeSet;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
+import javax.swing.event.TableModelEvent;
 import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -26,6 +29,7 @@ public class WeeklyPanel extends JPanel{
     private JLabel title;
     private Calendar currentTime;
     private JScrollPane scrollPane;
+    private EventFrame eFrame;
     private User user;
 
     private final Border UPPERBORDER= BorderFactory.createMatteBorder(1, 2, 0, 2, Color.BLACK);
@@ -72,11 +76,21 @@ public class WeeklyPanel extends JPanel{
             updateData();
             updateTitle();
         });
+        table.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+                if (e.getClickCount() == 2 && (eFrame==null || !eFrame.isVisible()) && data[row][col].event!=null) { 
+                    eFrame = new EventFrame("Event Options", data[row][col].event);
+                }
+            }
+        });
         table.setModel(model);
         table.setDefaultRenderer(Object.class, new CalendarRenderer());
         table.setIntercellSpacing(new Dimension(0,0));
         table.getTableHeader().setReorderingAllowed(false);
         table.getTableHeader().setResizingAllowed(false);
+        EventFrame.setUpExtras(model);
         title.setHorizontalAlignment(SwingConstants.CENTER);
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -106,7 +120,7 @@ public class WeeklyPanel extends JPanel{
 
     private void updateData(){
         TreeSet<Event> events = user.getEvents();
-        NavigableSet<Event> dayEvents;
+        NavigableSet<Event> dayEvents = new TreeSet<>();
         Calendar startTime;
         Calendar endTime;
         Calendar tempTime;
@@ -119,14 +133,20 @@ public class WeeklyPanel extends JPanel{
         endTime.add(Calendar.DAY_OF_MONTH, 2-currentTime.get(Calendar.DAY_OF_WEEK));
 
         for(int i=1; i<data[0].length; i++){
-            dayEvents=events.subSet(new Event(null, null, startTime), true, new Event(null, null, endTime), true);
+            dayEvents.clear();
+            for (Event e : events){
+                if (e.getEndTime().compareTo(startTime)>0 && e.getStartTime().compareTo(endTime) < 0)
+                    dayEvents.add(e);
+            }
+            //dayEvents=events.subSet(new Event(null, null, startTime), true, new Event(null, null, endTime), true);
+
             tempTime = (Calendar) startTime.clone();
             for (int j=0; j<data.length; j++){
                 h = data[j][i];
                 h.empty();
                 for(Event e: dayEvents){
                     if(e.spans(tempTime)){
-                        h.set(Color.RED, e);
+                        h.set(e);
                         break;
                     }
                 }
@@ -160,72 +180,69 @@ public class WeeklyPanel extends JPanel{
         repaint();
     }
 
-    private class CalendarRenderer extends JLabel implements TableCellRenderer {
-
-        public CalendarRenderer(){
-            setOpaque(true);
-        }
-        @Override
+    private class CalendarRenderer implements TableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                 int row, int column) {
             HalfHour h = (HalfHour)value;
-            setHorizontalAlignment(SwingConstants.CENTER);
             if(column > 0){
-                setText(null);
-                setBackground(h.color);
-                if(row>0 && data[row-1][column].isFull && row<data.length-1 && data[row+1][column].isFull){
-                    setBorder(new CompoundBorder(MIDDLEBORDER, BorderFactory.createMatteBorder(2, 0, 2, 0, h.color)));
-                } else if(row<data.length-1 && data[row+1][column].isFull){
-                    try{
-                        setText(h.event.getName());
-                    } catch (NullPointerException e){
-                        
+                h.setText(null);
+                if(data[row][column].isFull && row>0 && data[row-1][column].isFull && row<data.length-1 && data[row+1][column].isFull){
+                    h.setBorder(new CompoundBorder(MIDDLEBORDER, BorderFactory.createMatteBorder(2, 0, 2, 0, h.event.getColor())));
+                } else if(data[row][column].isFull && row<data.length-1 && data[row+1][column].isFull){
+                    if(h.event != null){
+                        h.setHorizontalAlignment(SwingConstants.CENTER);
+                        h.setText(h.event.getName());
                     }
-                    setBorder(new CompoundBorder(UPPERBORDER, BorderFactory.createMatteBorder(0, 0, 2, 0, h.color)));
-                } else if(row>0 && data[row-1][column].isFull){
-                    setBorder(new CompoundBorder(LOWERBORDER, BorderFactory.createMatteBorder(2, 0, 0, 0, h.color)));
+                    h.setBorder(new CompoundBorder(UPPERBORDER, BorderFactory.createMatteBorder(0, 0, 2, 0, h.event.getColor())));
+                } else if(data[row][column].isFull && row>0 && data[row-1][column].isFull){
+                    h.setBorder(new CompoundBorder(LOWERBORDER, BorderFactory.createMatteBorder(2, 0, 0, 0, h.event.getColor())));
                 } else{
-                    setBorder(ALLBORDER);
+                    h.setBorder(ALLBORDER);
                 }
-
+                if(h.event == null){
+                    h.setBackground(Color.WHITE);
+                } else{
+                    h.setBackground(h.event.getColor());
+                    if(h.event.getDescription()!= null){
+                        h.setToolTipText(h.event.getDescription());
+                    }
+                }
             } else{
-                setBackground(Color.WHITE);
-                setBorder(SIDEBORDER);
+                h.setBorder(SIDEBORDER);
                 switch (row){
                 case 0:
-                    setText("12:00 AM");
+                    h.setText("12:00 AM");
                     break;
                 case 6:
-                    setText("3:00 AM");
+                    h.setText("3:00 AM");
                     break;
                 case 12:
-                    setText("6:00 AM");
+                    h.setText("6:00 AM");
                     break;
                 case 18:
-                    setText("9:00 AM");
+                    h.setText("9:00 AM");
                     break;
                 case 24:
-                    setText("12:00 PM");
+                    h.setText("12:00 PM");
                     break;
                 case 30:
-                    setText("3:00 PM");
+                    h.setText("3:00 PM");
                     break;
                 case 36:
-                    setText("6:00 PM");
+                    h.setText("6:00 PM");
                     break;
                 case 42:
-                    setText("9:00 PM");
+                    h.setText("9:00 PM");
                     break;
                 default:
-                    setText(null);
-                    setBorder(null);
+                    h.setBorder(null);
                 }
             }
-            return this;
+            return h;
         }
     }
 
-    private class CalendarModel extends DefaultTableModel{
+    public class CalendarModel extends DefaultTableModel{
         public CalendarModel(){
             setDataVector(data, dates);
         }
@@ -233,23 +250,24 @@ public class WeeklyPanel extends JPanel{
         public boolean isCellEditable(int row, int column) {
             return false;
         }
+        public void update(){
+            fireTableChanged(new TableModelEvent(this));
+        }
     }
-    private class HalfHour{
+    private class HalfHour extends JLabel{
         private boolean isFull;
-        private Color color;
         private Event event;
 
         public HalfHour(){
             empty();
+            setOpaque(true);
         }
-        private void set(Color c, Event e){
+        private void set(Event e){
             isFull = true;
-            color = c;
             event = e;
         }
         private void empty(){
             isFull = false;
-            color = Color.WHITE;
             event = null;
         }
     }
