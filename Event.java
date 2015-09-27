@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.awt.Color;
 import java.util.Calendar;
 import java.util.Comparator;
 
@@ -8,10 +7,43 @@ public class Event implements Comparable<Event>{
     private String name;
     private Calendar startTime;
     private Calendar endTime;
+    private Color color;
+    private String description;
 
     public Event(String name, Calendar startTime, Calendar endTime){
         this.name = name;
         this.startTime = startTime;
+        this.endTime = endTime;
+    }
+    public Event(){
+        
+    }
+    
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setStartTime(Calendar startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(Calendar endTime) {
         this.endTime = endTime;
     }
 
@@ -29,6 +61,10 @@ public class Event implements Comparable<Event>{
 
     public long getDuration() {
         return (endTime.getTimeInMillis() - startTime.getTimeInMillis()) / 1800000;
+    }
+    
+    public boolean spans(Calendar c){
+        return endTime.compareTo(c)>0 && startTime.compareTo(c)<0;
     }
 
     @Override

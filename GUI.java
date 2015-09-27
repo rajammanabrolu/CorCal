@@ -1,8 +1,10 @@
 import javax.swing.*;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Calendar;
 
 public class GUI{
     private JFrame frame;
@@ -64,7 +66,13 @@ public class GUI{
         frame.setVisible(true);
     }
     public static void main (String[] args){
-        GUI g = new GUI(new User("Name"));
+        User u = new User("Name");
+        Calendar endTime= Calendar.getInstance();
+        endTime.add(Calendar.MINUTE, 780);
+        Event temp = new Event("HackGT", Calendar.getInstance(), endTime);
+        temp.setColor(Color.RED);
+        u.addEvent(temp);
+        GUI g = new GUI(u);
         g.setUpGUI();
     }
 }
