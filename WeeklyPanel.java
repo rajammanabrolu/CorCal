@@ -31,6 +31,8 @@ public class WeeklyPanel extends JPanel{
     private JScrollPane scrollPane;
     private EventFrame eFrame;
     private User user;
+    private JButton eventCreator;
+    private Event selectedEvent;
 
     private final Border UPPERBORDER= BorderFactory.createMatteBorder(1, 2, 0, 2, Color.BLACK);
     private final Border SIDEBORDER= BorderFactory.createMatteBorder(2, 0, 0, 0, Color.BLACK);
@@ -64,6 +66,19 @@ public class WeeklyPanel extends JPanel{
         scrollPane = new JScrollPane(table);
         left = new BasicArrowButton(BasicArrowButton.WEST);
         right = new BasicArrowButton(BasicArrowButton.EAST);
+        eventCreator = new JButton("Add Event");
+        eventCreator.addActionListener(e -> {
+            if ((eFrame==null || !eFrame.isVisible())) { 
+                selectedEvent = new Event("New Event", Calendar.getInstance(), Calendar.getInstance());
+                eFrame = new EventFrame("Event Options", selectedEvent);
+                eFrame.addCloseListener(close->{
+                    if(selectedEvent != null)
+                        user.addEvent(selectedEvent);
+                    selectedEvent = null;
+                    updateData();
+                });
+            }
+        });
         left.addActionListener(e -> {
             currentTime.add(Calendar.DAY_OF_MONTH, -7);
             updateDates();
@@ -82,6 +97,10 @@ public class WeeklyPanel extends JPanel{
                 int col = table.columnAtPoint(e.getPoint());
                 if (e.getClickCount() == 2 && (eFrame==null || !eFrame.isVisible()) && data[row][col].event!=null) { 
                     eFrame = new EventFrame("Event Options", data[row][col].event);
+                    selectedEvent = null;
+                    eFrame.addCloseListener(close->{
+                        updateData();
+                    });
                 }
             }
         });
@@ -90,7 +109,7 @@ public class WeeklyPanel extends JPanel{
         table.setIntercellSpacing(new Dimension(0,0));
         table.getTableHeader().setReorderingAllowed(false);
         table.getTableHeader().setResizingAllowed(false);
-        EventFrame.setUpExtras(model);
+        EventFrame.setUpExtras(this);
         title.setHorizontalAlignment(SwingConstants.CENTER);
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -111,6 +130,11 @@ public class WeeklyPanel extends JPanel{
         c.ipadx=20;
         add(right,c);
         c.gridx=0;
+        c.ipadx=0;
+        c.weightx=0;
+        add(eventCreator, c);
+        c.gridwidth=2;
+        c.gridx=0;
         c.gridy=1;
         c.gridwidth=3;
         c.weighty=1;
@@ -118,7 +142,7 @@ public class WeeklyPanel extends JPanel{
         add(scrollPane,c);
     }
 
-    private void updateData(){
+    public void updateData(){
         TreeSet<Event> events = user.getEvents();
         NavigableSet<Event> dayEvents = new TreeSet<>();
         Calendar startTime;
@@ -138,9 +162,8 @@ public class WeeklyPanel extends JPanel{
                 if (e.getEndTime().compareTo(startTime)>0 && e.getStartTime().compareTo(endTime) < 0)
                     dayEvents.add(e);
             }
-            //dayEvents=events.subSet(new Event(null, null, startTime), true, new Event(null, null, endTime), true);
-
             tempTime = (Calendar) startTime.clone();
+            tempTime.add(Calendar.MINUTE, 30);
             for (int j=0; j<data.length; j++){
                 h = data[j][i];
                 h.empty();

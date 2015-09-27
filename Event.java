@@ -16,9 +16,9 @@ public class Event implements Comparable<Event>{
         this.endTime = endTime;
     }
     public Event(){
-        
+
     }
-    
+
     public Color getColor() {
         return color;
     }
@@ -62,7 +62,7 @@ public class Event implements Comparable<Event>{
     public long getDuration() {
         return (endTime.getTimeInMillis() - startTime.getTimeInMillis()) / 1800000;
     }
-    
+
     public boolean spans(Calendar c){
         return endTime.compareTo(c)>0 && startTime.compareTo(c)<0;
     }

@@ -1,9 +1,13 @@
 import java.awt.Color;
+
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.EventObject;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -19,18 +23,17 @@ public class EventFrame extends JFrame{
     private JComboBox<String> colorCB, startTCB, startACB, startMCB, endTCB, endACB, endMCB;
     private JComboBox<Integer> startYCB, endYCB;
     private JButton confirm, cancel;
-    
+    private List<CloseListener> listeners;
+
     private static final HashMap<Color, Integer> TRANSLATOR = new HashMap<>();
     private static final HashMap<Integer, Color> DETRANSLATOR = new HashMap<>();
-    private static WeeklyPanel.CalendarModel master;
-    
+
     public EventFrame(String s, Event e){
         super(s);
         event=e;
         setUpFrame();
     }
-    public static void setUpExtras(WeeklyPanel.CalendarModel p){
-        master = p;
+    public static void setUpExtras(WeeklyPanel p){
         TRANSLATOR.put(Color.BLUE, 0);
         TRANSLATOR.put(Color.CYAN, 1);
         TRANSLATOR.put(Color.GREEN, 2);
@@ -57,23 +60,24 @@ public class EventFrame extends JFrame{
         nameTF= new JTextField();
         descripTF = new JTextField();
         errorMsg = new JLabel("Invalid Input");
+        listeners = new ArrayList<>();
         colorCB = new JComboBox<String>(new String[]{"Blue", "Cyan", "Green", "Magenta", "Orange", "Pink", "Red", "Yellow"});
         startMCB = new JComboBox<String>(new String[]{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"});
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"});
         startDCB = new JTextField();
         int year = Calendar.getInstance().get(Calendar.YEAR);
         startYCB = new JComboBox<Integer>(new Integer[]{year-2, year-1, year, year+1, year+2, year+3,
-                                                        year+4, year+5, year+6, year+7, year+8, year+9, year+10});
+                year+4, year+5, year+6, year+7, year+8, year+9, year+10});
         startTCB = new JComboBox<String>(new String[]{"12:00", "12:30", "1:00","1:30", "2:00", "2:30", "3:00", "3:30",
-                                                      "4:00", "4:30", "5:00", "5:30", "6:00", "6:30", 
-                                                       "7:00", "7:30", "8:00", "8:30", "9:00", "9:30",
-                                                       "10:00", "10:30", "11:00", "11:30"});
+                "4:00", "4:30", "5:00", "5:30", "6:00", "6:30", 
+                "7:00", "7:30", "8:00", "8:30", "9:00", "9:30",
+                "10:00", "10:30", "11:00", "11:30"});
         startACB = new JComboBox<String>(new String[]{"AM", "PM"});
         endMCB = new JComboBox<String>(new String[]{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"});
         endDCB = new JTextField();
         endYCB = new JComboBox<Integer>(new Integer[]{year-2, year-1, year, year+1, year+2, year+3,
-                  year+4, year+5, year+6, year+7, year+8, year+9, year+10});
+                year+4, year+5, year+6, year+7, year+8, year+9, year+10});
         endTCB = new JComboBox<String>(new String[]{"12:00", "12:30", "1:00","1:30", "2:00", "2:30", "3:00", "3:30",
                 "4:00", "4:30", "5:00", "5:30", "6:00", "6:30", 
                 "7:00", "7:30", "8:00", "8:30", "9:00", "9:30",
@@ -121,8 +125,8 @@ public class EventFrame extends JFrame{
         setSize(400,400);
         setPreferredSize(new Dimension(400,400));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
-        
+
+
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.gridx= 0;
@@ -180,22 +184,43 @@ public class EventFrame extends JFrame{
         pack();
         setVisible(true);
     }
-    
+
     private void updateEvent(){
         event.setName(nameTF.getText());
         event.setDescription(descripTF.getText());
         event.setColor(DETRANSLATOR.get(colorCB.getSelectedIndex()));
         Calendar start = event.getStartTime();
         int day = Integer.parseInt(startDCB.getText());
-        if (day>31)
+        if (day>31) //TODO
             throw new NumberFormatException();
         start.set((Integer)startYCB.getSelectedItem(), startMCB.getSelectedIndex(), Integer.parseInt(startDCB.getText()), startTCB.getSelectedIndex()/2 + ((startACB.getSelectedIndex()==1)?12:0), 30*(startTCB.getSelectedIndex()%2));
-        System.out.println(start.get(Calendar.DATE));
         Calendar end = event.getEndTime();
         day = Integer.parseInt(endDCB.getText());
-        if (day>31)
+        if (day>31) //TODO
             throw new NumberFormatException();
         end.set((Integer)endYCB.getSelectedItem(), endMCB.getSelectedIndex(), Integer.parseInt(endDCB.getText()), endTCB.getSelectedIndex()/2 + ((endACB.getSelectedIndex()==1)?12:0), 30*(endTCB.getSelectedIndex()%2));
-        master.update();
+        fireCloseEvent();
     }
+    public synchronized void addCloseListener(CloseListener l) {
+        listeners.add(l);
+    }
+
+    public synchronized void removeCloseListener(CloseListener l) {
+        listeners.remove(l);
+    }
+
+    private synchronized void fireCloseEvent() {
+        for(CloseListener l : listeners){
+            l.onClose(new CloseEvent(this));
+        }
+    }
+    public class CloseEvent extends EventObject{
+        public CloseEvent(Object source) {
+            super(source);
+        }
+    }
+    public interface CloseListener{
+        public void onClose(CloseEvent e);
+    }
+
 }
