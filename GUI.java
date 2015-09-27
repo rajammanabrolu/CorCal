@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.awt.event.WindowEvent;
-=======
->>>>>>> refs/remotes/origin/Mason
 import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import javax.swing.*;
@@ -12,12 +9,9 @@ import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-<<<<<<< HEAD
 import java.util.Calendar;
 import java.io.File;
 import java.awt.event.WindowListener;
-=======
->>>>>>> refs/remotes/origin/Mason
 
 public class GUI{
     private JFrame frame;
@@ -87,26 +81,6 @@ public class GUI{
                 ((CardLayout)(rootPanel.getLayout())).show(rootPanel, WEEKVIEW);
             }
         });
-<<<<<<< HEAD
-        create.addActionListener(event -> new EnterDataDialog(frame).show());
-        respond.addActionListener(event -> {
-                try{
-                    JFileChooser choice=new JFileChooser();
-                    if(choice.showDialog(frame,"Choose a Meeting Request")==JFileChooser.APPROVE_OPTION){
-                        MeetingRequest req=(MeetingRequest)new ObjectInputStream(new FileInputStream(choice.getSelectedFile())).readObject();
-                        if(choice.showDialog(frame,"Choose a place to save your response")==JFileChooser.APPROVE_OPTION){
-                            user.createBitField(req.startTime,req.endTime,choice.getSelectedFile());
-                        }
-                    }
-                }catch(ClassCastException e){
-                    JOptionPane.showMessageDialog(frame, "The file selected was not a Meeting Request", "Error", JOptionPane.ERROR_MESSAGE);
-                }catch(Exception error){
-                    JOptionPane.showMessageDialog(frame,"Oops, It looks like something went wrong: " + error.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
-                }
-            });
-        process.addActionListener(event ->{
-                    new OpenFileFrame(user).show();
-=======
         create.addActionListener(event -> new EnterDataDialog(frame).setVisible(true));
         respond.addActionListener(event -> {
                 try{
@@ -127,7 +101,6 @@ public class GUI{
             });
         process.addActionListener(event ->{
                     new OpenFileFrame(user).setVisible(true);
->>>>>>> refs/remotes/origin/Mason
                 });
         menuBar.add(view);
         menuBar.add(request);
