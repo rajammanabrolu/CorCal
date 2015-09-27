@@ -15,7 +15,7 @@ public class GUI{
     private WeeklyPanel weeklyPanel;
     private MonthView monthlyPanel;
     private User user;
-
+    
     private final String MONTHVIEW = "monthview";
     private final String WEEKVIEW = "weekview";
 
@@ -46,12 +46,16 @@ public class GUI{
         monthly.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
+                monthlyPanel.updateTime(weeklyPanel.getTime());
+                monthlyPanel.updateTable();
                 ((CardLayout)(rootPanel.getLayout())).show(rootPanel, MONTHVIEW);
             }
         });
         weekly.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
+                weeklyPanel.updateTime(monthlyPanel.getTime());
+                weeklyPanel.updateAll();
                 ((CardLayout)(rootPanel.getLayout())).show(rootPanel, WEEKVIEW);
             }
         });
@@ -65,14 +69,8 @@ public class GUI{
         frame.pack();
         frame.setVisible(true);
     }
-    public static void main (String[] args){
-        User u = new User("Name");
-        Calendar endTime= Calendar.getInstance();
-        endTime.add(Calendar.MINUTE, 780);
-        Event temp = new Event("HackGT", Calendar.getInstance(), endTime);
-        temp.setColor(Color.RED);
-        u.addEvent(temp);
-        GUI g = new GUI(u);
+    public static void main(String[] args){
+        GUI g = new GUI(new User("User1"));
         g.setUpGUI();
     }
 }

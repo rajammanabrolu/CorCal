@@ -1,7 +1,5 @@
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JFrame;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -15,16 +13,12 @@ import javax.swing.plaf.basic.BasicArrowButton;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Dimension;
-import javax.swing.BoxLayout;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.NavigableSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -36,6 +30,9 @@ public class MonthView extends JPanel{
     private JLabel display;
     private JScrollPane pane;
     private JTable table;
+    private EventFrame eFrame;
+    private JButton eventCreator;
+    private Event selectedEvent;
     private static final SimpleDateFormat timeFormat=new SimpleDateFormat("h:mm a");
     private static final SimpleDateFormat dateFormat=new SimpleDateFormat("MMM d");
     
@@ -77,6 +74,22 @@ public class MonthView extends JPanel{
         constraint.ipadx=20;
         add(right,constraint);
 
+        eventCreator= new JButton("Create Event");
+        eventCreator.addActionListener(e->{
+            if ((eFrame==null || !eFrame.isVisible())) { 
+                selectedEvent = new Event("New Event", Calendar.getInstance(), Calendar.getInstance());
+                eFrame = new EventFrame("Event Options", selectedEvent);
+                eFrame.addCloseListener(close->{
+                    this.user.addEvent(selectedEvent);
+                    updateTable();
+                });
+            }
+        });
+        constraint.weightx=0;
+        constraint.gridx=0;
+        constraint.ipadx=0; //TODO
+        add(eventCreator, constraint);
+        
         model=new CalendarTableModel();
         table=new JTable(model);
         table.setDefaultRenderer(Day.class, (t,v,i,h,r,c) -> (Day)v);
@@ -97,23 +110,16 @@ public class MonthView extends JPanel{
         display.setPreferredSize(new Dimension(300, 50));
         model.update();
     }
-
-    public static void main(String[] args){
-        User user = new User("asdfadsfadsfasdf");
-        Calendar start = Calendar.getInstance();
-        start.add(Calendar.DAY_OF_MONTH, 1);
-        Calendar end = (Calendar)start.clone();
-        end.add(Calendar.HOUR_OF_DAY, 2);
-        user.getEvents().add(new Event("adfaergwef", start, end));
-        JFrame frame=new JFrame();
-        frame.add(new MonthView(user));
-        frame.show();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
     
     public static boolean isSameDay(Calendar a, Calendar b){
         return a.get(Calendar.DAY_OF_MONTH) == b.get(Calendar.DAY_OF_MONTH)
                && a.get(Calendar.MONTH) == b.get(Calendar.MONTH);
+    }
+    public Calendar getTime(){
+        return now;
+    }
+    public void updateTime(Calendar c){
+        now.set(c.get(Calendar.YEAR), c.get(Calendar.MONTH), 1);
     }
 
     private class RenderCell extends AbstractCellEditor implements TableCellEditor{
@@ -144,14 +150,20 @@ public class MonthView extends JPanel{
             buttons=new ArrayList<>();
             c.fill=GridBagConstraints.BOTH;
             for(Event e : events){
-                System.out.println("Adding...");
                 StringBuffer b=new StringBuffer().append(e.getName());
-                //b.append(number == e.getStartTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getStartTime().getTime()) : "Yesterday")
-                // .append(" - ")
-                // .append(number == e.getEndTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getEndTime().getTime()) : "Tomorrow");
                 JButton adding=new JButton(b.toString());
                 c.weighty=e.getDuration();
-                adding.addActionListener(event -> System.out.println("Editing " + e));
+                adding.addActionListener(event -> {
+                    if (eFrame==null || !eFrame.isVisible()) { 
+                        selectedEvent=e;
+                        eFrame = new EventFrame("Event Options", selectedEvent);
+                        eFrame.addCloseListener(close->{
+                            if(close.delete)
+                                user.getEvents().remove(selectedEvent);
+                            updateTable();
+                        });
+                    }
+                });
                 buttons.add(adding);
                 add(adding,c);
             }
@@ -207,7 +219,6 @@ public class MonthView extends JPanel{
                     eventsForDay.addAll(multipleDays);
                     multipleDays.removeIf(e -> isSameDay(e.getEndTime(),date));
                     if(next != null && isSameDay(next.getStartTime(),date)){
-                        System.out.println("Added to " + dateFormat.format(date.getTime()));
                         eventsForDay.add(next);
                         if(!isSameDay(next.getEndTime(),date))
                             multipleDays.add(next);
