@@ -12,11 +12,11 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 public class User implements Serializable{
-    
+
     private static final long serialVersionUID=1L;
     private String name;
     TreeSet<Event> events=new TreeSet<>();
-    
+
     public User(String name) {
         this.name = name;
     }
@@ -32,15 +32,15 @@ public class User implements Serializable{
     public void createBitField (Calendar tStamp1, Calendar tStamp2) throws IOException, FileNotFoundException{
         FileOutputStream fos = new FileOutputStream("bitField.txt");
         ObjectOutputStream bitFieldWriter = new ObjectOutputStream(fos);
-    
+
         int finalDiff = Math.abs(tStamp1.DAY_OF_YEAR - tStamp2.DAY_OF_YEAR);
         int hourDiff = Math.abs(tStamp1.HOUR - tStamp2.HOUR);
         int[] bitField = new int[48 * finalDiff + 2 * hourDiff];
-    
+
         for (int i = 0; i < 48 * finalDiff + 2 * hourDiff; ++i) {
             bitField[i] = 0;
         }
-    
+
         for (Event e : events) {
             if (e.getStartTime().DAY_OF_YEAR != 0) {
                 bitField[e.getStartTime().DAY_OF_YEAR - tStamp1.DAY_OF_YEAR * 48 + (e.getStartTime().HOUR - tStamp1.DAY_OF_YEAR) * 2] = 1;
@@ -48,7 +48,7 @@ public class User implements Serializable{
         }
         bitFieldWriter.writeObject(bitField);   
     }
-    
+
     public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray) throws IOException, ClassNotFoundException {
         Scanner fs = new Scanner("bitField.txt");
         FileInputStream fis = new FileInputStream("bitField.txt");
@@ -93,7 +93,7 @@ public class User implements Serializable{
         if (flag == 0) {
             endTime = startTime = 0;
         }
-    
+
         Calendar finalTimeStart = tStamp1;
         Calendar finalTimeEnd = tStamp2;
         finalTimeStart.set(tStamp1.YEAR, finalTimeStart.DAY_OF_YEAR + startTime / 48);

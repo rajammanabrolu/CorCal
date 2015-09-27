@@ -15,14 +15,14 @@ public class GUI{
     private WeeklyPanel weeklyPanel;
     private MonthView monthlyPanel;
     private User user;
-    
+
     private final String MONTHVIEW = "monthview";
     private final String WEEKVIEW = "weekview";
-    
+
     public GUI(User u){
         user = u;
     }
-    
+
     public void setUpGUI(){
         frame = new JFrame("Calendar");
         monthlyPanel = new MonthView(user);
@@ -37,8 +37,8 @@ public class GUI{
         frame.setPreferredSize(new Dimension(1000,1000));
         frame.setSize(1000, 1000);
         rootPanel.setPreferredSize(new Dimension(1000,1000));
-        
-        
+
+
         rootPanel.setLayout(new CardLayout());
         rootPanel.add(monthlyPanel, MONTHVIEW);
         rootPanel.add(weeklyPanel, WEEKVIEW);
@@ -55,12 +55,12 @@ public class GUI{
                 ((CardLayout)(rootPanel.getLayout())).show(rootPanel, WEEKVIEW);
             }
         });
-        
+
         menuBar.add(view);
         menuBar.add(settings);
         view.add(monthly);
         view.add(weekly);
-        
+
         frame.setJMenuBar(menuBar);
         frame.pack();
         frame.setVisible(true);
