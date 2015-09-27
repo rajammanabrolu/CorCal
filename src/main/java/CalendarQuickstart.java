@@ -100,11 +100,11 @@ public class CalendarQuickstart {
         //   com.google.api.services.calendar.model.Calendar class.
         com.google.api.services.calendar.Calendar service =
             getCalendarService();
-
+            int i = 0;
         // List the next 10 events from the primary calendar.
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = service.events().list("primary")
-            .setMaxResults(10)
+            .setMaxResults(100)
             .setTimeMin(now)
             .setOrderBy("startTime")
             .setSingleEvents(true)
@@ -126,5 +126,4 @@ public class CalendarQuickstart {
             }
         }
     }
-
 }

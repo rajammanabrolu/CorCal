@@ -1,9 +1,10 @@
 import java.awt.Color;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.io.Serializable;
 
-public class Event implements Comparable<Event>{
-
+public class Event implements Comparable<Event>,Serializable{
+    private static final long serialVersionUID=1L;
     private String name;
     private Calendar startTime;
     private Calendar endTime;

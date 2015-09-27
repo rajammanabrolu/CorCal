@@ -1,3 +1,7 @@
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.awt.event.WindowEvent;
 import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import javax.swing.*;
@@ -7,6 +11,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
+import java.io.File;
+import java.awt.event.WindowListener;
 
 public class GUI{
     private JFrame frame;
@@ -21,8 +27,19 @@ public class GUI{
     private final String MONTHVIEW = "monthview";
     private final String WEEKVIEW = "weekview";
 
-    public GUI(User u){
-        user = u;
+    public GUI(){
+        File file=new File("user");
+        try{
+            if(file.exists()){
+                System.out.println("Reading...");
+                user = (User)new ObjectInputStream(new FileInputStream(file)).readObject();
+            }else
+                user = new User("adsf");
+        }catch (Exception e){
+            System.out.println(e);
+            user = new User("asdf");
+        }
+        System.out.println(user.getEvents().size());
     }
 
     public void setUpGUI(){
@@ -95,9 +112,30 @@ public class GUI{
         frame.setJMenuBar(menuBar);
         frame.pack();
         frame.setVisible(true);
+        frame.addWindowListener(new WindowListener(){
+                @Override public void windowActivated(WindowEvent e){}
+
+                @Override public void windowClosed(WindowEvent e){
+                    try{
+                        new ObjectOutputStream(new FileOutputStream("user")).writeObject(user);
+                    }catch (IOException event){
+                    }
+                }
+
+                @Override public void windowClosing(WindowEvent e){
+                    try{
+                        new ObjectOutputStream(new FileOutputStream("user")).writeObject(user);
+                    }catch (IOException event){
+                    }
+                }
+                @Override public void windowDeactivated(WindowEvent e){}
+                @Override public void windowDeiconified(WindowEvent e){}
+                @Override public void windowIconified(WindowEvent e){}
+                @Override public void windowOpened(WindowEvent e){}
+            });
     }
     public static void main(String[] args){
-        GUI g = new GUI(new User("User1"));
+        GUI g = new GUI();
         g.setUpGUI();
     }
 }
