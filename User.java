@@ -49,9 +49,15 @@ public class User implements Serializable{
             }
         }
 	    bitFieldWriter.writeObject(bitField);
+<<<<<<< HEAD
 	    //for (int i = 0; i < bitField.length; i++) {
 	    	//System.out.print(bitField[i]);
 	    //}
+=======
+	    for (int i = 0; i < bitField.length; i++) {
+	    	//System.out.print(bitField[i]);
+	    }
+>>>>>>> refs/remotes/origin/Mason
         bitFieldWriter.close();
 	}
 

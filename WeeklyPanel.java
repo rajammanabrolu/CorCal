@@ -39,6 +39,7 @@ public class WeeklyPanel extends JPanel{
     private final Border LOWERBORDER= BorderFactory.createMatteBorder(0, 2, 1, 2, Color.BLACK);
     private final Border MIDDLEBORDER= BorderFactory.createMatteBorder(0, 2, 0, 2, Color.BLACK);
     private final Border ALLBORDER= BorderFactory.createMatteBorder(1, 2, 1, 2, Color.BLACK);
+
     public WeeklyPanel(User u){
         user = u;
         setUpPanel();
@@ -58,9 +59,7 @@ public class WeeklyPanel extends JPanel{
             }
         }
         dates[0] = "Time";
-        updateDates();
-        updateData();
-        updateTitle();
+        updateAll();
         table = new JTable(data, dates);
         model = new CalendarModel();
         scrollPane = new JScrollPane(table);
@@ -72,34 +71,30 @@ public class WeeklyPanel extends JPanel{
                 selectedEvent = new Event("New Event", Calendar.getInstance(), Calendar.getInstance());
                 eFrame = new EventFrame("Event Options", selectedEvent);
                 eFrame.addCloseListener(close->{
-                    if(selectedEvent != null)
-                        user.addEvent(selectedEvent);
-                    selectedEvent = null;
-                    updateData();
+                    user.addEvent(selectedEvent);
+                    updateAll();
                 });
             }
         });
         left.addActionListener(e -> {
             currentTime.add(Calendar.DAY_OF_MONTH, -7);
-            updateDates();
-            updateData();
-            updateTitle();
+            updateAll();
         });
         right.addActionListener(e -> {
             currentTime.add(Calendar.DAY_OF_MONTH, 7);
-            updateDates();
-            updateData();
-            updateTitle();
+            updateAll();
         });
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
                 if (e.getClickCount() == 2 && (eFrame==null || !eFrame.isVisible()) && data[row][col].event!=null) { 
-                    eFrame = new EventFrame("Event Options", data[row][col].event);
-                    selectedEvent = null;
+                    selectedEvent= data[row][col].event;
+                    eFrame = new EventFrame("Event Options", selectedEvent);
                     eFrame.addCloseListener(close->{
-                        updateData();
+                        if(close.delete)
+                            user.getEvents().remove(selectedEvent);
+                        updateAll();
                     });
                 }
             }
@@ -141,7 +136,11 @@ public class WeeklyPanel extends JPanel{
         c.fill=GridBagConstraints.BOTH;
         add(scrollPane,c);
     }
-
+    public void updateAll(){
+        updateDates();
+        updateData();
+        updateTitle();
+    }
     public void updateData(){
         TreeSet<Event> events = user.getEvents();
         NavigableSet<Event> dayEvents = new TreeSet<>();
@@ -201,6 +200,13 @@ public class WeeklyPanel extends JPanel{
             }
         }
         repaint();
+    }
+    public Calendar getTime(){
+        return currentTime;
+    }
+
+    public void updateTime(Calendar c){
+        currentTime.set(c.get(Calendar.YEAR), c.get(Calendar.MONTH), currentTime.get(Calendar.DAY_OF_MONTH));
     }
 
     private class CalendarRenderer implements TableCellRenderer {

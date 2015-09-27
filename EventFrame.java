@@ -22,7 +22,7 @@ public class EventFrame extends JFrame{
     private JTextField nameTF, descripTF, startDCB, endDCB;
     private JComboBox<String> colorCB, startTCB, startACB, startMCB, endTCB, endACB, endMCB;
     private JComboBox<Integer> startYCB, endYCB;
-    private JButton confirm, cancel;
+    private JButton confirm, cancel, delete;
     private List<CloseListener> listeners;
 
     private static final HashMap<Color, Integer> TRANSLATOR = new HashMap<>();
@@ -85,6 +85,7 @@ public class EventFrame extends JFrame{
         endACB = new JComboBox<String>(new String[]{"AM", "PM"});
         confirm = new JButton("Confirm");
         cancel = new JButton("Cancel");
+        delete = new JButton("Delete");
         errorMsg.setVisible(false);
         if(event.getName()!= null){
             nameTF.setText(event.getName());
@@ -121,6 +122,11 @@ public class EventFrame extends JFrame{
             } catch(NumberFormatException err){
                 errorMsg.setVisible(true);
             }
+        });
+        delete.addActionListener(e->{
+            fireCloseEvent(true);
+            setVisible(false);
+            dispose();
         });
         setSize(400,400);
         setPreferredSize(new Dimension(400,400));
@@ -181,6 +187,8 @@ public class EventFrame extends JFrame{
         add(endYCB, c);
         c.gridy=7;
         add(errorMsg, c);
+        c.gridx=2;
+        add(delete,c);
         pack();
         setVisible(true);
     }
@@ -191,15 +199,19 @@ public class EventFrame extends JFrame{
         event.setColor(DETRANSLATOR.get(colorCB.getSelectedIndex()));
         Calendar start = event.getStartTime();
         int day = Integer.parseInt(startDCB.getText());
-        if (day>31) //TODO
+        start.set(Calendar.MONTH, startMCB.getSelectedIndex());
+        if (day>start.getActualMaximum(Calendar.DAY_OF_MONTH))
             throw new NumberFormatException();
         start.set((Integer)startYCB.getSelectedItem(), startMCB.getSelectedIndex(), Integer.parseInt(startDCB.getText()), startTCB.getSelectedIndex()/2 + ((startACB.getSelectedIndex()==1)?12:0), 30*(startTCB.getSelectedIndex()%2));
         Calendar end = event.getEndTime();
         day = Integer.parseInt(endDCB.getText());
-        if (day>31) //TODO
+        end.set(Calendar.MONTH, endMCB.getSelectedIndex());
+        if (day>end.getActualMaximum(Calendar.DAY_OF_MONTH))
             throw new NumberFormatException();
         end.set((Integer)endYCB.getSelectedItem(), endMCB.getSelectedIndex(), Integer.parseInt(endDCB.getText()), endTCB.getSelectedIndex()/2 + ((endACB.getSelectedIndex()==1)?12:0), 30*(endTCB.getSelectedIndex()%2));
-        fireCloseEvent();
+        if (start.compareTo(end)>=0)
+            throw new NumberFormatException();
+        fireCloseEvent(false);
     }
     public synchronized void addCloseListener(CloseListener l) {
         listeners.add(l);
@@ -209,14 +221,17 @@ public class EventFrame extends JFrame{
         listeners.remove(l);
     }
 
-    private synchronized void fireCloseEvent() {
+    private synchronized void fireCloseEvent(boolean b) {
         for(CloseListener l : listeners){
-            l.onClose(new CloseEvent(this));
+            l.onClose(new CloseEvent(this, b));
         }
     }
     public class CloseEvent extends EventObject{
-        public CloseEvent(Object source) {
+        public boolean delete;
+
+        public CloseEvent(Object source, boolean del) {
             super(source);
+            delete = del;
         }
     }
     public interface CloseListener{
