@@ -29,8 +29,8 @@ public class User implements Serializable{
         return events;
     }
 
-	public void createBitField (Calendar tStamp1, Calendar tStamp2) throws IOException, FileNotFoundException{
-		FileOutputStream fos = new FileOutputStream("bitField.txt",false);
+	public void createBitField (Calendar tStamp1, Calendar tStamp2, File file) throws IOException, FileNotFoundException{
+		FileOutputStream fos = new FileOutputStream(file,false);
 	    ObjectOutputStream bitFieldWriter = new ObjectOutputStream(fos);
 	    int finalDiff = Math.abs(tStamp1.get(Calendar.DAY_OF_YEAR) - tStamp2.get(Calendar.DAY_OF_YEAR));
 	    int hourDiff = Math.abs(tStamp1.get(Calendar.HOUR) - tStamp2.get(Calendar.HOUR));
@@ -49,9 +49,9 @@ public class User implements Serializable{
             }
         }
 	    bitFieldWriter.writeObject(bitField);
-	    for (int i = 0; i < bitField.length; i++) {
+	    //for (int i = 0; i < bitField.length; i++) {
 	    	//System.out.print(bitField[i]);
-	    }
+	    //}
         bitFieldWriter.close();
 	}
 
@@ -134,7 +134,7 @@ public class User implements Serializable{
         //System.out.println("More later " + moreLater.get(Calendar.DAY_OF_YEAR));
 		myUser.getEvents().add(new Event("To laundry", now, later));
 		myUser.getEvents().add(new Event("To laundry", later, moreLater));
-		myUser.createBitField(later, moreLater);
+		myUser.createBitField(later, moreLater, new File("bitfield.txt"));
 	}
 
     public void addEvent(Event e) {

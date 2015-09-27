@@ -1,3 +1,5 @@
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
 import javax.swing.*;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -10,7 +12,7 @@ public class GUI{
     private JFrame frame;
     private JMenuBar menuBar;
     private JMenu view, request;
-    private JMenuItem monthly, weekly, create;
+    private JMenuItem monthly, weekly, create, respond;
     private JPanel rootPanel;
     private WeeklyPanel weeklyPanel;
     private MonthView monthlyPanel;
@@ -34,6 +36,7 @@ public class GUI{
         monthly = new JMenuItem("Monthly");
         weekly = new JMenuItem("Weekly");
         create = new JMenuItem("Create");
+        respond = new JMenuItem("Respond");
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(1000,1000));
@@ -58,12 +61,28 @@ public class GUI{
             }
         });
         create.addActionListener(event -> new EnterDataDialog(frame).show());
+        respond.addActionListener(event -> {
+                try{
+                    JFileChooser choice=new JFileChooser();
+                    if(choice.showDialog(frame,"Choose a Meeting Request")==JFileChooser.APPROVE_OPTION){
+                        MeetingRequest req=(MeetingRequest)new ObjectInputStream(new FileInputStream(choice.getSelectedFile())).readObject();
+                        if(choice.showDialog(frame,"Choose a place to save your response")==JFileChooser.APPROVE_OPTION){
+                            user.createBitField(req.startTime,req.endTime,choice.getSelectedFile());
+                        }
+                    }
+                }catch(ClassCastException e){
+                    JOptionPane.showMessageDialog(frame, "The file selected was not a Meeting Request", "Error", JOptionPane.ERROR_MESSAGE);
+                }catch(Exception error){
+                    JOptionPane.showMessageDialog(frame,"Oops, It looks like something went wrong: " + error.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+                }
+            });
 
         menuBar.add(view);
         menuBar.add(request);
         view.add(monthly);
         view.add(weekly);
         request.add(create);
+        request.add(respond);
 
         frame.setJMenuBar(menuBar);
         frame.pack();

@@ -156,9 +156,10 @@ public class EnterDataDialog extends JDialog {
                                 File file=selector.getSelectedFile();
                                 ObjectOutputStream o=new ObjectOutputStream(new FileOutputStream(file));
                                 o.writeObject(request);
+                                dispose();
                             }
                         }catch(Exception error){
-                            JOptionPane.showMessageDialog(this,"Oops, It looks like something went wrong: " + error.getMessage());
+                            JOptionPane.showMessageDialog(this,"Oops, It looks like something went wrong: " + error.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
                         }
                     });
 				buttonPane.add(okButton);
