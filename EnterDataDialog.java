@@ -1,6 +1,15 @@
+import javax.swing.JOptionPane;
+import java.io.File;
+import java.io.ObjectOutputStream;
+import java.io.FileOutputStream;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JFileChooser;
+import java.text.SimpleDateFormat;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.Calendar;
 
+import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -31,7 +40,7 @@ public class EnterDataDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			EnterDataDialog dialog = new EnterDataDialog();
+			EnterDataDialog dialog = new EnterDataDialog(null);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -42,7 +51,8 @@ public class EnterDataDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public EnterDataDialog() {
+	public EnterDataDialog(JFrame frame) {
+        super(frame, "Create a Calendar Request", true);
 		setBounds(100, 100, 501, 325);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -53,7 +63,7 @@ public class EnterDataDialog extends JDialog {
 			txtrEnterThe.setFont(new Font("Arial", Font.BOLD, 13));
 			txtrEnterThe.setBackground(Color.LIGHT_GRAY);
 			txtrEnterThe.setEditable(false);
-			txtrEnterThe.setText("Enter the 2 time stamps between which you want to find free slots:");
+			txtrEnterThe.setText("Enter the 2 dates and times between which you want to find times when no body is busy:");
 			contentPanel.add(txtrEnterThe);
 		}
 		{
@@ -113,7 +123,7 @@ public class EnterDataDialog extends JDialog {
 			txtEnterLengthOf = new JTextField();
 			txtEnterLengthOf.setBackground(Color.LIGHT_GRAY);
 			txtEnterLengthOf.setEditable(false);
-			txtEnterLengthOf.setText("Enter length of the free time slot that you want to find : ");
+			txtEnterLengthOf.setText("Enter length of the free time slot that you want to find in minutes (will round up to the half hour): ");
 			contentPanel.add(txtEnterLengthOf);
 			txtEnterLengthOf.setColumns(10);
 		}
@@ -129,13 +139,34 @@ public class EnterDataDialog extends JDialog {
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("OK");
-				okButton.setActionCommand("OK");
+                okButton.addActionListener(e -> {
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd hh:mm a");
+                        try{
+                            Calendar start =Calendar.getInstance();
+                            start.setTime(format.parse(textField_2.getText() + textField_1.getText()));
+                            Calendar end =Calendar.getInstance();
+                            end.setTime(format.parse(textField_5.getText() + textField_5.getText()));
+                            int duration = Integer.parseInt(textField.getText());
+                            duration=(int)Math.ceil(duration / 30.);
+                            MeetingRequest request=new MeetingRequest(start,end,duration);
+                            JFileChooser selector = new JFileChooser();
+                            selector.setMultiSelectionEnabled(false);
+                            selector.setFileFilter(new FileNameExtensionFilter("Meeting Requests",".rqt"));
+                            if(selector.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
+                                File file=selector.getSelectedFile();
+                                ObjectOutputStream o=new ObjectOutputStream(new FileOutputStream(file));
+                                o.writeObject(request);
+                            }
+                        }catch(Exception error){
+                            JOptionPane.showMessageDialog(this,"Oops, It looks like something went wrong: " + error.getMessage());
+                        }
+                    });
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
 				JButton cancelButton = new JButton("Cancel");
-				cancelButton.setActionCommand("Cancel");
+                cancelButton.addActionListener(e -> this.dispose());
 				buttonPane.add(cancelButton);
 			}
 		}
