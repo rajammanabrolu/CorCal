@@ -34,31 +34,28 @@ public class User implements Serializable{
 	    ObjectOutputStream bitFieldWriter = new ObjectOutputStream(fos);
 	    int finalDiff = Math.abs(tStamp1.get(Calendar.DAY_OF_YEAR) - tStamp2.get(Calendar.DAY_OF_YEAR));
 	    int hourDiff = Math.abs(tStamp1.get(Calendar.HOUR) - tStamp2.get(Calendar.HOUR));
-	    int[] bitField = new int[48 * finalDiff + 2 * hourDiff];
-        //System.out.println(bitField.length);
-        System.out.printf("%d %d%n",tStamp1.get(Calendar.DAY_OF_YEAR) , tStamp1.get(Calendar.HOUR));
+	    int[] bitField = new int[finalDiff * hourDiff * 2];
+        //System.out.printf("%d %d%n",tStamp1.get(Calendar.DAY_OF_YEAR) , tStamp1.get(Calendar.HOUR));
         for(Event e:events){
-            System.out.printf("%d %d%n", e.getStartTime().get(Calendar.DAY_OF_YEAR), e.getStartTime().get(Calendar.HOUR));
+            //System.out.printf("%d %d%n", e.getStartTime().get(Calendar.DAY_OF_YEAR), e.getStartTime().get(Calendar.HOUR));
             for (int i = 0; i < finalDiff; ++i) {
-                for (int j = 0; j < 24; ++j) {
+                for (int j = 0; j < hourDiff * 2; ++j) {
                     if (e.getStartTime().get(Calendar.DAY_OF_YEAR) == tStamp1.get(Calendar.DAY_OF_YEAR) + i
                         && e.getStartTime().get(Calendar.HOUR) == tStamp1.get(Calendar.HOUR) + j) {
-                        bitField[i * 48 + j] = 1;
-                        bitField[i * 48 + j + 1] = 1;
+                        bitField[i + j] = 1;
+                        bitField[i + j + 1] = 1;
                     }
                 }
             }
         }
-
-        //System.out.println(finalDiff);
 	    bitFieldWriter.writeObject(bitField);
 	    for (int i = 0; i < bitField.length; i++) {
-	    	System.out.print(bitField[i]);
+	    	//System.out.print(bitField[i]);
 	    }
         bitFieldWriter.close();
 	}
 
-	public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray) throws IOException, ClassNotFoundException {
+	public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray, int meetingLength) throws IOException, ClassNotFoundException {
 		Scanner fs = new Scanner("bitField.txt");
 		FileInputStream fis = new FileInputStream("bitField.txt");
 	    ObjectInputStream reader = new ObjectInputStream(fis);
@@ -71,33 +68,42 @@ public class User implements Serializable{
 	    int finalDiff = Math.abs(tStamp1.get(Calendar.DAY_OF_YEAR) - tStamp2.get(Calendar.DAY_OF_YEAR));
 	    int endTime = 0;
 	    int startTime = 0;
-	    int freeHours = Math.abs((tStamp1.get(Calendar.HOUR) - tStamp2.get(Calendar.HOUR))) + finalDiff * 24;
-	    int timeDiff = freeHours * 2;
-	    for (int i = 0; i < bitFields.size(); ++i) {
-	        for (int j = 0; j < freeHours * 2; ++j) {
+	    int hourDiff = Math.abs((tStamp1.get(Calendar.HOUR) - tStamp2.get(Calendar.HOUR)));
+        int timeDiff = hourDiff * 2;
+	    for (int i = 0; i < finalDiff; ++i) {
+	        for (int j = 0; j < hourDiff * 2; ++j) {
 	            if (bitFields.get(i + j) == bitFields.get(i + j + 1)) {
 	                counter++;
-	                if (counter == timeDiff + 2) {
-	                    endTime = i + j;
-	                    startTime = i + j - timeDiff;
+	                if (counter == meetingLength + 2) {
+	                    endTime = i + j + 1;
+	                    startTime = i + j - meetingLength - 1;
 	                    flag = 1;
 	                }
 	            } else {
 	            	counter = 0;
 	            }
+               if (i + j == hourDiff * 2) {
+                   counter = 0;
+               }
 	        }
 	    }
 	    if (flag == 0) {
-	        for (int i = 0; i < bitFields.size(); ++i) {
-	            for (int j = 0; j < freeHours * 2; ++j) {
+	        for (int i = 0; i < finalDiff; ++i) {
+	            for (int j = 0; j < hourDiff; ++j) {
 	                if (bitFields.get(i + j) == bitFields.get(i + j + 1)) {
 	                    counter++;
-	                    if (counter == timeDiff + 2) {
+	                    if (counter == meetingLength + 2) {
 	                        endTime = i + j + 1;
-	                        startTime = i + j - timeDiff - 1;
+	                        startTime = i + j - meetingLength - 1;
 	                        flag = 1;
-	                    }
+	                    } else {
+                            counter = 0;
+                        }
+                        if (i + j == hourDiff * 2) {
+                            counter = 0;
+                        }
 	                }
+
 	            }
 	        }
 	    }
@@ -107,10 +113,10 @@ public class User implements Serializable{
 
 	    Calendar finalTimeStart = tStamp1;
 	    Calendar finalTimeEnd = tStamp2;
-	    finalTimeStart.set(tStamp1.get(Calendar.YEAR), finalTimeStart.get(Calendar.DAY_OF_YEAR) + startTime / 48);
-	    finalTimeStart.set(tStamp1.get(Calendar.HOUR), finalTimeStart.get(Calendar.HOUR) + (startTime % 48) / 2);
-	    finalTimeEnd.set(tStamp2.get(Calendar.YEAR), finalTimeEnd.get(Calendar.DAY_OF_YEAR) + endTime / 48);
-	    finalTimeEnd.set(tStamp2.get(Calendar.HOUR), finalTimeEnd.get(Calendar.HOUR) + (endTime % 48) /2);
+	    finalTimeStart.set(tStamp1.get(Calendar.YEAR), finalTimeStart.get(Calendar.DAY_OF_YEAR) + (int) startTime / (hourDiff * 2));
+	    finalTimeStart.set(tStamp1.get(Calendar.HOUR), finalTimeStart.get(Calendar.HOUR) + (startTime % (hourDiff * 2)) / 2);
+	    finalTimeEnd.set(tStamp2.get(Calendar.YEAR), finalTimeEnd.get(Calendar.DAY_OF_YEAR) + endTime / (hourDiff * 2));
+	    finalTimeEnd.set(tStamp2.get(Calendar.HOUR), finalTimeEnd.get(Calendar.HOUR) + (endTime % (hourDiff * 2) /2));
 	    Calendar[] finalTimings = {finalTimeStart , finalTimeEnd};
         reader.close();
         fs.close();
@@ -124,8 +130,8 @@ public class User implements Serializable{
 		later.set(2015, 8, 25, 9, 0);
 		Calendar moreLater = Calendar.getInstance();
 		moreLater.set(2015, 8, 29, 12, 0);
-        System.out.println("now " + now.get(Calendar.DAY_OF_YEAR) + " later " + later.get(Calendar.DAY_OF_YEAR));
-        System.out.println("More later " + moreLater.get(Calendar.DAY_OF_YEAR));
+        //System.out.println("now " + now.get(Calendar.DAY_OF_YEAR) + " later " + later.get(Calendar.DAY_OF_YEAR));
+        //System.out.println("More later " + moreLater.get(Calendar.DAY_OF_YEAR));
 		myUser.getEvents().add(new Event("To laundry", now, later));
 		myUser.getEvents().add(new Event("To laundry", later, moreLater));
 		myUser.createBitField(later, moreLater);
