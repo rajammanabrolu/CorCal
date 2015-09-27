@@ -2,8 +2,8 @@ import java.util.Calendar;
 import java.util.NavigableSet;
 import java.io.Serializable;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 import java.io.File;
-import java.util.Scanner;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -65,7 +65,7 @@ public class User implements Serializable{
         bitFieldWriter.close();
     }
 
-    public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray, int meetingLength) throws IOException, ClassNotFoundException {
+    public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray, int meetingLength) throws IOException, ClassNotFoundException, ExecutionException {
         ArrayList<int[]> bfs = new ArrayList<int[]>();
         int halfHourDiff = 2*(tStamp2.get(Calendar.HOUR_OF_DAY) - tStamp1.get(Calendar.HOUR_OF_DAY));
 
@@ -105,9 +105,12 @@ public class User implements Serializable{
             }
             
         }
-        if (localMax> globalMax){
+        if (localMax > globalMax){
             globalMax = localMax;
             globalStart = localStart;
+        }
+        if(globalMax < meetingLength){
+            throw new ExecutionException(new Throwable("No Valid Answer Found"));
         }
         
         Calendar start= (Calendar) tStamp1.clone();
@@ -120,36 +123,6 @@ public class User implements Serializable{
         Calendar[] finalTimings = {start, end};
         return finalTimings;
         
-    }
-    public static void main(String[] args) throws IOException, FileNotFoundException {
-        User myUser = new User("Nikola");
-        Calendar c1 = Calendar.getInstance();
-        Calendar c2 = Calendar.getInstance();
-        Calendar c3 = Calendar.getInstance();
-        Calendar c4 = Calendar.getInstance();
-        Calendar c5 = Calendar.getInstance();
-        Calendar c6 = Calendar.getInstance();
-        /*c1.set(2015, 8, 25, 3, 0);
-        c2.set(2015, 8, 25, 6, 0);
-        c3.set(2015, 8, 25, 9, 0);
-        c4.set(2015, 8, 26, 7, 0);
-        c5.set(2015, 8, 25, 4, 0);
-        c6.set(2015, 8, 26, 11, 0);
-        myUser.getEvents().add(new Event("To laundry", c1, c2));
-        myUser.getEvents().add(new Event("To laundry", c3, c4));
-        myUser.createBitField(c5, c6);*/
-        int[] i1 = new int[]{0,0,1,1,1,0,0,0,1,1,0,0};
-        int[] i2 = new int[]{0,0,1,0,0,0,0,0,1,0,0,0};
-        int[] i3 = new int[]{0,0,0,1,1,0,0,0,0,0,0,0};
-        int[] i4 = new int[]{0,0,1,0,0,0,0,0,0,0,0,0};
-        ArrayList<int[]> al = new ArrayList<>();
-        al.add(i1);
-        al.add(i2);
-        al.add(i3);
-        al.add(i4);
-        //testMerge(c1,c2,al);
-
-
     }
 
     public void addEvent(Event e) {

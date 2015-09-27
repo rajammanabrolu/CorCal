@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -31,7 +32,7 @@ public class OpenFileFrame extends JFrame{
 
     private void setUp(){
         files = new ArrayList<>();
-        findBit = new JButton("Add BitFields");
+        findBit = new JButton("Add Responses");
         findMr = new JButton("Add Meeting Request");
         calc = new JButton("Calculate!");
         log = new JTextArea("Select Bitfields and Meeting Request to Open \n");
@@ -41,13 +42,15 @@ public class OpenFileFrame extends JFrame{
 
         setSize(400,400);
         setPreferredSize(new Dimension(400,400));
+
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         log.setEditable(false);
         findBit.addActionListener(e->{
             int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 files.add(file);
-                log.append("Added Bitfield: " + file.getName() + ".\n");
+                log.append("Added Response: " + file.getName() + ".\n");
                 log.setCaretPosition(log.getDocument().getLength());
             }
         });
@@ -64,23 +67,24 @@ public class OpenFileFrame extends JFrame{
                     in.close();
                 } catch (Exception e1) {
                     log.append("Error: Not a Meeting Request" + ".\n");
-                    e1.printStackTrace();
                 } 
                 log.setCaretPosition(log.getDocument().getLength());
             }
         });
         calc.addActionListener(e->{
-            if(mr != null){
+            if(mr != null && files.size()>0){
                 try {
                     Calendar[] result= user.readFiles(mr.startTime, mr.endTime, files.toArray(new File[files.size()]), mr.duration);
                     log.append("Free time found between \n"+ new DateFormatSymbols().getMonths()[result[0].get(Calendar.MONTH)]
                             + " " + result[0].get(Calendar.DAY_OF_MONTH) + " " + result[0].get(Calendar.YEAR) + " "
-                            + result[0].get(Calendar.HOUR_OF_DAY)+ ":" + result[0].get(Calendar.MINUTE) + "and \n" +
+                            + result[0].get(Calendar.HOUR_OF_DAY)+ ":" + result[0].get(Calendar.MINUTE) + (result[0].get(Calendar.MINUTE)==0?"0":" ") + " and \n" +
                             new DateFormatSymbols().getMonths()[result[1].get(Calendar.MONTH)]
                             + " " + result[1].get(Calendar.DAY_OF_MONTH) + " " + result[1].get(Calendar.YEAR) + " "
-                            + result[1].get(Calendar.HOUR_OF_DAY)+ ":" + result[1].get(Calendar.MINUTE));
-                } catch (Exception e1) {
-                    e1.printStackTrace();
+                            + result[1].get(Calendar.HOUR_OF_DAY)+ ":" + result[1].get(Calendar.MINUTE) + (result[1].get(Calendar.MINUTE)== 0?"0":" "));
+                }catch(ExecutionException e1){
+                    log.append("No free time found \n");
+                }catch (Exception e2) {
+                    e2.printStackTrace();
                 }
             } else {
                 log.append("Please add the required files first.\n");
@@ -105,8 +109,5 @@ public class OpenFileFrame extends JFrame{
         add(scroller, c);
         pack();
         setVisible(true);
-    }
-    public static void main(String[] args){
-        OpenFileFrame b= new OpenFileFrame(new User("User1"));
     }
 }
