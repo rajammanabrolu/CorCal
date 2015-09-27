@@ -49,26 +49,20 @@ public class User implements Serializable{
             }
         }
 	    bitFieldWriter.writeObject(bitField);
-<<<<<<< HEAD
 	    //for (int i = 0; i < bitField.length; i++) {
 	    	//System.out.print(bitField[i]);
 	    //}
-=======
-	    for (int i = 0; i < bitField.length; i++) {
-	    	//System.out.print(bitField[i]);
-	    }
->>>>>>> refs/remotes/origin/Mason
         bitFieldWriter.close();
 	}
 
 	public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray, int meetingLength) throws IOException, ClassNotFoundException {
-		Scanner fs = new Scanner("bitField.txt");
-		FileInputStream fis = new FileInputStream("bitField.txt");
-	    ObjectInputStream reader = new ObjectInputStream(fis);
-	    ArrayList<int[]>bitFields = new ArrayList<int[]>();
-	    while (fs.hasNext()) {
-	    	bitFields.add((int[]) reader.readObject());
-	    }
+		ArrayList<int[]> bitFields = new ArrayList<>();
+        for(File f : fileArray){
+            FileInputStream fis = new FileInputStream(f);
+            ObjectInputStream reader = new ObjectInputStream(fis);
+            bitFields.add((int[])reader.readObject());
+            reader.close();
+        }
 	    int counter = 0;
 	    int flag = 0;
 	    int finalDiff = Math.abs(tStamp1.get(Calendar.DAY_OF_YEAR) - tStamp2.get(Calendar.DAY_OF_YEAR));
@@ -124,8 +118,6 @@ public class User implements Serializable{
 	    finalTimeEnd.set(tStamp2.get(Calendar.YEAR), finalTimeEnd.get(Calendar.DAY_OF_YEAR) + endTime / (hourDiff * 2));
 	    finalTimeEnd.set(tStamp2.get(Calendar.HOUR), finalTimeEnd.get(Calendar.HOUR) + (endTime % (hourDiff * 2) /2));
 	    Calendar[] finalTimings = {finalTimeStart , finalTimeEnd};
-        reader.close();
-        fs.close();
 	    return finalTimings;
 	}
 

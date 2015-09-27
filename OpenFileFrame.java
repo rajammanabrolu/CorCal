@@ -41,7 +41,6 @@ public class OpenFileFrame extends JFrame{
 
         setSize(400,400);
         setPreferredSize(new Dimension(400,400));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         log.setEditable(false);
         findBit.addActionListener(e->{
             int returnVal = fc.showOpenDialog(this);
@@ -73,7 +72,7 @@ public class OpenFileFrame extends JFrame{
         calc.addActionListener(e->{
             if(mr != null){
                 try {
-                    Calendar[] result= user.readFiles(mr.startTime, mr.endTime, (File[]) files.toArray(), mr.duration);
+                    Calendar[] result= user.readFiles(mr.startTime, mr.endTime, files.toArray(new File[files.size()]), mr.duration);
                     log.append("Free time found between \n"+ new DateFormatSymbols().getMonths()[result[0].get(Calendar.MONTH)]
                             + " " + result[0].get(Calendar.DAY_OF_MONTH) + " " + result[0].get(Calendar.YEAR) + " "
                             + result[0].get(Calendar.HOUR_OF_DAY)+ ":" + result[0].get(Calendar.MINUTE) + "and \n" +

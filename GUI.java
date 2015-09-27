@@ -12,7 +12,7 @@ public class GUI{
     private JFrame frame;
     private JMenuBar menuBar;
     private JMenu view, request;
-    private JMenuItem monthly, weekly, create, respond;
+    private JMenuItem monthly, weekly, create, respond, process;
     private JPanel rootPanel;
     private WeeklyPanel weeklyPanel;
     private MonthView monthlyPanel;
@@ -37,6 +37,7 @@ public class GUI{
         weekly = new JMenuItem("Weekly");
         create = new JMenuItem("Create");
         respond = new JMenuItem("Respond");
+        process = new JMenuItem("Process");
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(1000,1000));
@@ -80,13 +81,16 @@ public class GUI{
                     JOptionPane.showMessageDialog(frame,"Oops, It looks like something went wrong: " + error.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
                 }
             });
-
+        process.addActionListener(event ->{
+                    new OpenFileFrame(user).show();
+                });
         menuBar.add(view);
         menuBar.add(request);
         view.add(monthly);
         view.add(weekly);
         request.add(create);
         request.add(respond);
+        request.add(process);
 
         frame.setJMenuBar(menuBar);
         frame.pack();
