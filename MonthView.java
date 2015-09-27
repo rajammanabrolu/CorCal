@@ -144,18 +144,11 @@ public class MonthView extends JPanel{
             buttons=new ArrayList<>();
             c.fill=GridBagConstraints.BOTH;
             for(Event e : events){
-<<<<<<< HEAD
                 System.out.println("Adding...");
                 StringBuffer b=new StringBuffer().append(e.getName());
                 //b.append(number == e.getStartTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getStartTime().getTime()) : "Yesterday")
                 // .append(" - ")
                 // .append(number == e.getEndTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getEndTime().getTime()) : "Tomorrow");
-=======
-                StringBuffer b=new StringBuffer();
-                b.append(number == e.getStartTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getStartTime()) : "Yesterday")
-                 .append(" - ")
-                 .append(number == e.getEndTime().get(Calendar.DAY_OF_MONTH) ? timeFormat.format(e.getEndTime()) : "Tomorrow");
->>>>>>> refs/remotes/origin/Mason
                 JButton adding=new JButton(b.toString());
                 c.weighty=e.getDuration();
                 adding.addActionListener(event -> System.out.println("Editing " + e));
@@ -213,10 +206,6 @@ public class MonthView extends JPanel{
 
                     eventsForDay.addAll(multipleDays);
                     multipleDays.removeIf(e -> isSameDay(e.getEndTime(),date));
-<<<<<<< HEAD
-=======
-
->>>>>>> refs/remotes/origin/Mason
                     if(next != null && isSameDay(next.getStartTime(),date)){
                         System.out.println("Added to " + dateFormat.format(date.getTime()));
                         eventsForDay.add(next);
