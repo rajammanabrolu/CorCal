@@ -55,7 +55,7 @@ public class User implements Serializable{
         bitFieldWriter.close();
 	}
 
-	public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray) throws IOException, ClassNotFoundException {
+	public Calendar[] readFiles(Calendar tStamp1, Calendar tStamp2, File[] fileArray, int meetingLength) throws IOException, ClassNotFoundException {
 		Scanner fs = new Scanner("bitField.txt");
 		FileInputStream fis = new FileInputStream("bitField.txt");
 	    ObjectInputStream reader = new ObjectInputStream(fis);
@@ -74,9 +74,9 @@ public class User implements Serializable{
 	        for (int j = 0; j < hourDiff * 2; ++j) {
 	            if (bitFields.get(i + j) == bitFields.get(i + j + 1)) {
 	                counter++;
-	                if (counter == timeDiff + 2) {
-	                    endTime = i + j;
-	                    startTime = i + j - timeDiff;
+	                if (counter == meetingLength + 2) {
+	                    endTime = i + j + 1;
+	                    startTime = i + j - meetingLength - 1;
 	                    flag = 1;
 	                }
 	            } else {
@@ -92,9 +92,9 @@ public class User implements Serializable{
 	            for (int j = 0; j < hourDiff; ++j) {
 	                if (bitFields.get(i + j) == bitFields.get(i + j + 1)) {
 	                    counter++;
-	                    if (counter == timeDiff + 2) {
+	                    if (counter == meetingLength + 2) {
 	                        endTime = i + j + 1;
-	                        startTime = i + j - timeDiff - 1;
+	                        startTime = i + j - meetingLength - 1;
 	                        flag = 1;
 	                    } else {
                             counter = 0;
