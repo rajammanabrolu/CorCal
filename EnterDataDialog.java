@@ -53,7 +53,7 @@ public class EnterDataDialog extends JDialog {
 	 */
 	public EnterDataDialog(JFrame frame) {
         super(frame, "Create a Calendar Request", true);
-		setBounds(100, 100, 501, 325);
+		setBounds(100, 100, 601, 325);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -63,7 +63,7 @@ public class EnterDataDialog extends JDialog {
 			txtrEnterThe.setFont(new Font("Arial", Font.BOLD, 13));
 			txtrEnterThe.setBackground(Color.LIGHT_GRAY);
 			txtrEnterThe.setEditable(false);
-			txtrEnterThe.setText("Enter the 2 dates and times between which you want to find times when no body is busy:");
+			txtrEnterThe.setText("Enter the 2 dates between which you want to find times when no body is busy in during certain hours:");
 			contentPanel.add(txtrEnterThe);
 		}
 		{
@@ -81,20 +81,6 @@ public class EnterDataDialog extends JDialog {
 			textField_2.setColumns(10);
 		}
 		{
-			txtTime = new JTextField();
-			txtTime.setBackground(Color.LIGHT_GRAY);
-			txtTime.setEditable(false);
-			txtTime.setText("Enter the corresponding time for 1st date as HH:MM AM/PM : ");
-			contentPanel.add(txtTime);
-			txtTime.setColumns(10);
-		}
-		{
-			textField_1 = new JTextField();
-			textField_1.setBackground(Color.LIGHT_GRAY);
-			contentPanel.add(textField_1);
-			textField_1.setColumns(10);
-		}
-		{
 			txtEnterndDate = new JTextField();
 			txtEnterndDate.setEditable(false);
 			txtEnterndDate.setBackground(Color.LIGHT_GRAY);
@@ -108,9 +94,23 @@ public class EnterDataDialog extends JDialog {
 			contentPanel.add(textField_4);
 			textField_4.setColumns(10);
 		}
+		{
+			txtTime = new JTextField();
+			txtTime.setBackground(Color.LIGHT_GRAY);
+			txtTime.setEditable(false);
+			txtTime.setText("Enter the earliest during the day you can meet as HH:MM AM/PM");
+			contentPanel.add(txtTime);
+			txtTime.setColumns(10);
+		}
+		{
+			textField_1 = new JTextField();
+			textField_1.setBackground(Color.LIGHT_GRAY);
+			contentPanel.add(textField_1);
+			textField_1.setColumns(10);
+		}
 		txtTime_1.setEditable(false);
 		txtTime_1.setBackground(Color.LIGHT_GRAY);
-		txtTime_1.setText("Enter the corresponding time for 2nd date as HH:MM AM/PM : ");
+		txtTime_1.setText("Enter the latest the meeting can go as HH:MM AM/PM : ");
 		contentPanel.add(txtTime_1);
 		txtTime_1.setColumns(10);
 		{
@@ -143,15 +143,15 @@ public class EnterDataDialog extends JDialog {
                         SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd hh:mm a");
                         try{
                             Calendar start =Calendar.getInstance();
-                            start.setTime(format.parse(textField_2.getText() + textField_1.getText()));
+                            start.setTime(format.parse(textField_2.getText() + " " + textField_1.getText()));
                             Calendar end =Calendar.getInstance();
-                            end.setTime(format.parse(textField_5.getText() + textField_5.getText()));
+                            end.setTime(format.parse(textField_4.getText() + " " + textField_5.getText()));
                             int duration = Integer.parseInt(textField.getText());
                             duration=(int)Math.ceil(duration / 30.);
                             MeetingRequest request=new MeetingRequest(start,end,duration);
                             JFileChooser selector = new JFileChooser();
                             selector.setMultiSelectionEnabled(false);
-                            selector.setFileFilter(new FileNameExtensionFilter("Meeting Requests",".rqt"));
+                            //selector.setFileFilter(new FileNameExtensionFilter("Meeting Requests",".rqt"));
                             if(selector.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
                                 File file=selector.getSelectedFile();
                                 ObjectOutputStream o=new ObjectOutputStream(new FileOutputStream(file));

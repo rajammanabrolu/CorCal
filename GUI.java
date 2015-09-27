@@ -9,8 +9,8 @@ import java.util.Calendar;
 public class GUI{
     private JFrame frame;
     private JMenuBar menuBar;
-    private JMenu view, settings;
-    private JMenuItem monthly, weekly;
+    private JMenu view, request;
+    private JMenuItem monthly, weekly, create;
     private JPanel rootPanel;
     private WeeklyPanel weeklyPanel;
     private MonthView monthlyPanel;
@@ -30,9 +30,11 @@ public class GUI{
         rootPanel = new JPanel();
         menuBar= new JMenuBar();
         view = new JMenu("View");
-        settings = new JMenu("Settings");
+        request = new JMenu("Request");
         monthly = new JMenuItem("Monthly");
         weekly = new JMenuItem("Weekly");
+        create = new JMenuItem("Create");
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(1000,1000));
         frame.setSize(1000, 1000);
@@ -55,11 +57,13 @@ public class GUI{
                 ((CardLayout)(rootPanel.getLayout())).show(rootPanel, WEEKVIEW);
             }
         });
+        create.addActionListener(event -> new EnterDataDialog(frame).show());
         
         menuBar.add(view);
-        menuBar.add(settings);
+        menuBar.add(request);
         view.add(monthly);
         view.add(weekly);
+        request.add(create);
         
         frame.setJMenuBar(menuBar);
         frame.pack();
